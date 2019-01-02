@@ -7,7 +7,14 @@
 	Twitter:		@butch7903
 	GitHub:			https://github.com/butch7903
 	===========================================================================
-
+	.NOTES
+	===========================================================================
+	Forked and bugfixed by:		Joseph Daniel McCorkle
+	Date:			December 28, 2018
+	Version:		3.0
+	Twitter:		@?????
+	GitHub:			https://github.com/????????
+	===========================================================================
 	.SYNOPSIS
 		This script automates the full server build process for any virtual machine. It also automates the configuration
 		of the Windows operating system and installs basic applications for standard business processes.
@@ -807,6 +814,16 @@ $label28.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([Syste
 $label28.TabIndex = [System.Int32]60
 $label28.Text = 'DNS2'
 
+#label30
+$label30 = (New-Object -TypeName System.Windows.Forms.Label)
+$label30.AutoSize = $true
+$label30.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]310,[System.Int32]586))
+$label30.Name = 'label30'
+$label30.Visible = $false
+$label30.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]36,[System.Int32]13))
+$label30.TabIndex = [System.Int32]61
+$label30.Text = 'DNS3'
+
 #label29
 $label29 = (New-Object -TypeName System.Windows.Forms.Label)
 $label29.AutoSize = $true
@@ -818,7 +835,7 @@ $label29.Text = 'Datacenter'
 
 #VMNameBox
 $VMNameBox = (New-Object -TypeName System.Windows.Forms.TextBox)
-$VMNameBox.CharacterCasing = [System.Windows.Forms.CharacterCasing]::Upper
+$VMNameBox.CharacterCasing = [System.Windows.Forms.CharacterCasing]::Lower
 $VMNameBox.ImeMode = [System.Windows.Forms.ImeMode]::NoControl
 $VMNameBox.Text = $VMNAME
 $VMNameBox.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]113,[System.Int32]49))
@@ -916,7 +933,7 @@ $ReplaceVMCheckBox.TabIndex = [System.Int32]8
 
 #ReplacementVMTextBox
 $ReplacementVMTextBox = (New-Object -TypeName System.Windows.Forms.TextBox)
-$ReplacementVMTextBox.CharacterCasing = [System.Windows.Forms.CharacterCasing]::Upper
+$ReplacementVMTextBox.CharacterCasing = [System.Windows.Forms.CharacterCasing]::Lower
 $ReplacementVMTextBox.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]57,[System.Int32]48))
 $ReplacementVMTextBox.Name = 'ReplacementVMTextBox'
 $ReplacementVMTextBox.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]191,[System.Int32]20))
@@ -961,7 +978,8 @@ $DatacentercomboBox.Text = $DATACENTER
 $DatacentercomboBox_SelectedIndexChanged = {
 	$ClusterComboBox.Enabled = $true
 	$CLUSTERS = Get-Datacenter $DatacentercomboBox.text | Get-Cluster * | Select NAME
-	$CLUSTERS = $CLUSTERS.NAME
+	#Joe: changed this to an array to solve for issue below
+	$CLUSTERS = @($CLUSTERS.NAME)
 	$CLUSTERS += "*No Cluster"
 	$CLUSTERS = $CLUSTERS | Sort-Object
 	$ClusterComboBox.Items.Clear()
@@ -984,6 +1002,15 @@ $DatacentercomboBox_SelectedIndexChanged = {
 $DatacenterComboBox.add_SelectedIndexChanged($DatacenterComboBox_SelectedIndexChanged)
 $DatacentercomboBox.TabIndex = [System.Int32]10
 
+#Joe: this box below has errors if there is only One cluster in the datacenter
+
+	<#Get-Cluster : Cannot validate argument on parameter 'Name'. The argument is null or empty. Provide an argument that is not null or empty, and then try the command again.
+At D:\vDeploy-master\vDeploy-master\vDeploy.PS1:1012 char:26
++         $VMHOSTS = Get-Cluster $CLUSTER | G ...
++                                ~~~~~~~~
+    + CategoryInfo          : InvalidData: (:) [Get-Cluster], ParameterBindingValidationException
+	+ FullyQualifiedErrorId : ParameterArgumentValidationError,VMware.VimAutomation.ViCore.Cmdlets.Commands.GetCluster
+	#>
 #ClusterComboBox
 $ClusterComboBox = (New-Object -TypeName System.Windows.Forms.ComboBox)
 #$ClusterComboBox.DropDownStyle = [System.Windows.Forms.ComboBoxStyle]::DropDownList #This Causes errors when user does not fill out all fields correctly
@@ -1215,11 +1242,13 @@ $OverrideDHCPcheckBox_Checked = {
 	$Label26.Visible = $true
 	$Label27.Visible = $true
 	$Label28.Visible = $true
+	$Label30.Visible = $true
 	$IPTextBox.Visible = $true
 	$SubnetTextBox.Visible = $true
 	$DGTextBox.Visible = $true
 	$DNS1TextBox.Visible = $true
 	$DNS2TextBox.Visible = $true
+	$DNS3TextBox.Visible = $true
 }
 $OverrideDHCPcheckBox_UNChecked = {
 	$ReplacementVMTextBox.Visible = $false
@@ -1228,11 +1257,13 @@ $OverrideDHCPcheckBox_UNChecked = {
 	$Label26.Visible = $false
 	$Label27.Visible = $false
 	$Label28.Visible = $false
+	$Label30.Visible = $false
 	$IPTextBox.Visible = $false
 	$SubnetTextBox.Visible = $false
 	$DGTextBox.Visible = $false
 	$DNS1TextBox.Visible = $false
 	$DNS2TextBox.Visible = $false
+	$DNS3TextBox.Visible = $false
 }
 $OverrideDHCPcheckBox.add_CheckedChanged($OverrideDHCPcheckBox_Checked)
 $OverrideDHCPcheckBox.remove_CheckedChanged($OverrideDHCPcheckBox_UNChecked)
@@ -1288,6 +1319,15 @@ $DNS2TextBox.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([S
 $DNS2TextBox.Text = $DNS2
 $DNS2TextBox.TabIndex = [System.Int32]26
 
+#DNS3TextBox
+$DNS3TextBox = (New-Object -TypeName System.Windows.Forms.TextBox)
+$DNS3TextBox.Location = (New-Object -TypeName System.Drawing.Point -ArgumentList @([System.Int32]351,[System.Int32]583))
+$DNS3TextBox.Name = 'DNS3TextBox'
+$DNS3TextBox.Visible = $false
+$DNS3TextBox.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]96,[System.Int32]20))
+$DNS3TextBox.Text = $DNS3
+$DNS3TextBox.TabIndex = [System.Int32]27
+
 #VMTagCheckedListBox
 $VMTagCheckedListBox = (New-Object -TypeName System.Windows.Forms.CheckedListBox)
 $VMTagCheckedListBox.FormattingEnabled = $true
@@ -1297,7 +1337,7 @@ $VMTagCheckedListBox.Name = 'VMTagCheckedListBox'
 $VMTagCheckedListBox.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]339,[System.Int32]49))
 $VMTAGS = Get-Tag | foreach {$_.Name} | Sort-Object
 $VMTagCheckedListBox.Items.AddRange($VMTAGS)
-$VMTagCheckedListBox.TabIndex = [System.Int32]27
+$VMTagCheckedListBox.TabIndex = [System.Int32]28
 
 #NSXTagCheckedListBox
 $NSXTagCheckedListBox = (New-Object -TypeName System.Windows.Forms.CheckedListBox)
@@ -1319,7 +1359,7 @@ $NewServerInt = [array]::indexof($NSXTAGS, $NSXDEFAULTTAG) #Get Integer for inde
 $NSXTagCheckedListBox.SetItemChecked($NewServerInt, $true) #Set $NSXDEFAULTTAG Tag as defaulted to True
 }
 }
-$NSXTagCheckedListBox.TabIndex = [System.Int32]28
+$NSXTagCheckedListBox.TabIndex = [System.Int32]29
 
 ##NSX Config not present
 if(!$DefaultNSXConnection.Server){
@@ -1348,7 +1388,7 @@ $OKbutton.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([Syst
 $OKbutton.Text = 'OK'
 $OKbutton.UseVisualStyleBackColor = $true
 $OKbutton.add_Click($OKbutton_Click)
-$OKbutton.TabIndex = [System.Int32]29
+$OKbutton.TabIndex = [System.Int32]30
 
 #Cancel Button Click
 $Cancelbutton_Click = { 
@@ -1364,7 +1404,7 @@ $Cancelbutton.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([
 $Cancelbutton.Text = 'Cancel'
 $Cancelbutton.UseVisualStyleBackColor = $true
 $Cancelbutton.add_Click($Cancelbutton_Click)
-$Cancelbutton.TabIndex = [System.Int32]30
+$Cancelbutton.TabIndex = [System.Int32]31
 
 #MainForm
 $MainForm.Controls.Add($label1)
@@ -1397,11 +1437,13 @@ $MainForm.Controls.Add($label25)
 $MainForm.Controls.Add($label26)
 $MainForm.Controls.Add($label27)
 $MainForm.Controls.Add($label28)
+$MainForm.Controls.Add($label30)
 $MainForm.Controls.Add($label29)
 $MainForm.Controls.Add($Cancelbutton)
 $MainForm.Controls.Add($OKbutton)
 $MainForm.Controls.Add($NSXTagCheckedListBox)
 $MainForm.Controls.Add($VMTagCheckedListBox)
+$MainForm.Controls.Add($DNS3TextBox)
 $MainForm.Controls.Add($DNS2TextBox)
 $MainForm.Controls.Add($DNS1TextBox)
 $MainForm.Controls.Add($DGTextBox)
@@ -1433,7 +1475,7 @@ $MainForm.Controls.Add($VMTemplateComboBox)
 $ret = $MainForm.ShowDialog()
 
 #################return values
-$OUTPUT = "" | Select-Object -Property VMName,VCPUS,RAM,Template,DEV,DMZ,PCI,VMReplace,VMNameReplace,Site,Datacenter,Cluster,VMHost,PortGroup,Datastore,OSCustomization,VMType,VMFolder,Notes,Owner,AppList,OverRideDHCP,IP,Subnet,DG,DNS1,DNS2,VMTags,NSXTags,Cancel
+$OUTPUT = "" | Select-Object -Property VMName,VCPUS,RAM,Template,DEV,DMZ,PCI,VMReplace,VMNameReplace,Site,Datacenter,Cluster,VMHost,PortGroup,Datastore,OSCustomization,VMType,VMFolder,Notes,Owner,AppList,OverRideDHCP,IP,Subnet,DG,DNS1,DNS2,DNS3,VMTags,NSXTags,Cancel
 $OUTPUT.VMName = $VMNameBox.Text
 $OUTPUT.VCPUS = $CPUnumericUpDown.Value
 $OUTPUT.RAM = $RAMnumericUpDown.Value
@@ -1461,6 +1503,7 @@ $OUTPUT.Subnet = $SubnetTextBox.Text
 $OUTPUT.DG = $DGTextBox.Text
 $OUTPUT.DNS1 = $DNS1TextBox.Text
 $OUTPUT.DNS2 = $DNS2TextBox.Text
+$OUTPUT.DNS3 = $DNS3TextBox.Text
 $OUTPUT.VMTAGS = $VMTagCheckedListBox.CheckedItems
 $OUTPUT.NSXTAGS = $NSXTagCheckedListBox.CheckedItems
 $OUTPUT.CANCEL = $MainForm.DialogResult
@@ -1473,9 +1516,9 @@ Function HardDiskForm {
  .SYNOPSIS  
  Create Hard Disk Form and Populate fields  
  .DESCRIPTION  
- The function creates the Hard Disk Form and populates the field so that users can select inputs
+ The function creates the Hard Disk Form and populates the field so that users can select inputs. Joe: added the maximum number for vSphere 6.5 VMDK max size 63488GB (62TB)
  .NOTES   
- Author: Russell Hamker  
+ Author: Russell Hamker Edited By Joseph McCorkle  
  Twitter: @butch7903 
  .PARAMETER N/a  
  No Parameters Required  
@@ -1484,7 +1527,7 @@ Function HardDiskForm {
  #>  
   #####################################    
   ## https://www.github.com/butch7903/PowerCLI   
-  ## Version: 1    
+  ## Version: 1.2    
   ## Written using Microsoft Visual Studio Community 2017   
   ## Tested this script on    
   ## 1) Powershell v5    
@@ -1566,6 +1609,7 @@ $Drive0numericUpDown.Location = (New-Object -TypeName System.Drawing.Point -Argu
 $Drive0numericUpDown.Name = 'Drive1numericUpDown'
 $Drive0numericUpDown.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]56,[System.Int32]20))
 $Drive0numericUpDown.TabIndex = [System.Int32]1
+$Drive0numericUpDown.Maximum = 63488 #Joe: default limit is 100 (GB)
 $Drive0numericUpDown.Minimum = $Drive0Minimum
 
 #Drive1numericUpDown
@@ -1576,6 +1620,7 @@ $Drive1numericUpDown.Size = (New-Object -TypeName System.Drawing.Size -ArgumentL
 $Drive1numericUpDown.Visible = [System.Convert]::ToBoolean($VMTYPELIST.Drive1LabelLabel)
 $Drive1numericUpDown.TabIndex = [System.Int32]2
 $Drive1numericUpDown.Visible = $Drive1
+$Drive1numericUpDown.Maximum = 63488 #Joe:
 $Drive1numericUpDown.Minimum = $Drive1Minimum
 
 #Drive1SizeLabel
@@ -1647,6 +1692,7 @@ $Drive2numericUpDown.Name = 'Drive2numericUpDown'
 $Drive2numericUpDown.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]56,[System.Int32]20))
 $Drive2numericUpDown.TabIndex = [System.Int32]3
 $Drive2numericUpDown.Visible = $Drive2
+$Drive2numericUpDown.Maximum = 63488 #Joe:
 $Drive2numericUpDown.Minimum = $Drive2Minimum
 
 #Drive2SizeLabel
@@ -1718,6 +1764,7 @@ $Drive3numericUpDown.Name = 'Drive3numericUpDown'
 $Drive3numericUpDown.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]56,[System.Int32]20))
 $Drive3numericUpDown.TabIndex = [System.Int32]4
 $Drive3numericUpDown.Visible = $Drive3
+$Drive3numericUpDown.Maximum = 63488 #Joe:
 $Drive3numericUpDown.Minimum = $Drive3Minimum
 
 #Drive3SizeLabel
@@ -1789,6 +1836,7 @@ $Drive4numericUpDown.Name = 'Drive4numericUpDown'
 $Drive4numericUpDown.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]56,[System.Int32]20))
 $Drive4numericUpDown.TabIndex = [System.Int32]5
 $Drive4numericUpDown.Visible = $Drive4
+$Drive4numericUpDown.Maximum = 63488 #Joe:
 $Drive4numericUpDown.Minimum = $Drive4Minimum
 
 #Drive4SizeLabel
@@ -1860,6 +1908,7 @@ $Drive5numericUpDown.Name = 'Drive5numericUpDown'
 $Drive5numericUpDown.Size = (New-Object -TypeName System.Drawing.Size -ArgumentList @([System.Int32]56,[System.Int32]20))
 $Drive5numericUpDown.TabIndex = [System.Int32]6
 $Drive5numericUpDown.Visible = $Drive5
+$Drive5numericUpDown.Maximum = 63488 #Joe:
 $Drive5numericUpDown.Minimum = $Drive5Minimum
 
 #Drive5SizeLabel
@@ -2148,15 +2197,16 @@ $DATASTORE = "" ####Set this to "" otherwise form will not work correctly
 $OSCUSTOMIZATION = "" ####Set this to "" otherwise form will not work correctly
 $VMTYPE = "" ####Set this to "" otherwise form will not work correctly
 $VMFOLDER = "" ####Set this to "" otherwise form will not work correctly
-$NOTES = ""
+$NOTES = "Deployed through vDeploy: Add notes here"
 $OWNERS = ""
 $OVERRIDEDHCP = "Unchecked" #Setting Default
 $IP = ""
-$SUBNET = ""
+$SUBNET = "255.255.255.0"
 $DG = ""
 $DNS1 = ""
-$DNS2 = ""
-$NSXDEFAULTTAGS = 'New-Servers' #Case Sensitive
+$DNS2 = "" 
+$DNS3 = "" 
+$NSXDEFAULTTAGS = '' #Case Sensitive
 Write-Host "Setting Default Variables for MainForm Completed"
 Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
 Write-Host "-----------------------------------------------------------------------------------------------------------------------"
@@ -2215,6 +2265,7 @@ $SUBNET = $A.Subnet
 $DG = $A.DG
 $DNS1 = $A.DNS1
 $DNS2 = $A.DNS2
+$DNS3 = $A.DNS3
 $VMTAGS = $A.VMTAGS
 $NSXTAGS = $A.NSXTAGS
 Write-Host "Converting Variables from MainForm Output to Proper Formatting Completed"
@@ -2246,7 +2297,7 @@ WHILE($OSCUSTOMIZATION -eq "")
 ##Assign Domain Credentials for AD and WinRM Usage
 ##Create Secure User Account file
 #Specify Creds Login info
-$DOMAIN = Get-OSCustomizationSpec $OSCUSTOMIZATION.Domain -ErrorAction SilentlyContinue
+$DOMAIN = 'sky.net' #Joe: had to hard code this. Was:Get-OSCustomizationSpec $OSCUSTOMIZATION.Domain -ErrorAction SilentlyContinue
 $DomainUserFile = $pwd.path+"\"+$DOMAIN+"_Creds.xml"
 If (Test-Path $DomainUserFile){
 	Write-Host "Domain Credentials Login file found"
@@ -2726,6 +2777,23 @@ IF($OVERRIDEDHCP -eq "Checked")
 			}
 		}
 	}
+	IF($DNS3)
+	{
+		WHILE($DNS3 -notmatch $IPREGEX)
+		{
+			Write-Warning "VM DNS3 IP is an Invalid format"
+			Write-Host "Please input VM DNS3 IP" -foregroundcolor "green"
+			Write-Host "Please re-input VM Tags if used" -foregroundcolor "green"
+			Write-Host "Please re-input NSX Tags if used" -foregroundcolor "green"
+			$A = MainForm
+			$DNS3 = $A.DNS3
+			$CANCEL = $A.CANCEL
+			IF($CANCEL -eq "CANCEL")
+			{
+				Stop-ScriptNow "Cancel Button was hit"
+			}
+		}
+	}
 }
 #If App to be installed is MS SQL 2016, create SQL Service Password to auto-generate service account with
 IF($A.APPLIST -match "MS SQL 2016")
@@ -2836,6 +2904,7 @@ $SUBNET = $A.Subnet
 $DG = $A.DG
 $DNS1 = $A.DNS1
 $DNS2 = $A.DNS2
+$DNS3 = $A.DNS3
 $NSXTAGS = $A.NSXTAGS
 Write-Host "Converting User MainForm Variables to Proper Formatting/Variables Completed"
 Write-Host (Get-Date -format "MMM-dd-yyyy_HH-mm-ss")
@@ -2856,8 +2925,8 @@ CATCH
 ##Update Hard Drive Configuration based on Selected Hard Disk Configuration
 $VMTYPELIST = $VMTYPELIST.Where({$_.Name -eq $VMTYPE})
 ##Set Variables for Modification
-$DriveCount = $VMTYPELIST.DriveCount
-$ControllerCount = $VMTYPELIST.ControllerCount
+$DriveCount = $VMTYPELIST.DriveCount #Joe: this is not used in the script at all, possibly remove.
+$ControllerCount = $VMTYPELIST.ControllerCount #Joe: this is not used in the script at all, possibly remove.
 $DVDLetter = $VMTYPELIST.DVDLetter
 $Drive0 = [System.Convert]::ToBoolean($VMTYPELIST.Drive0)
 $Drive0Letter = $VMTYPELIST.Drive0Letter
@@ -3016,6 +3085,7 @@ IF($OVERRIDEDHCP -eq $true)
 	Write-Host "VM Default Gateway IP will be:		"$DG
 	Write-Host "VM DNS1 IP will be:			"$DNS1
 	Write-Host "VM DNS2 IP will be:			"$DNS2
+	Write-Host "VM DNS3 IP will be:			"$DNS3
 }
 Else{
 	Write-Host "VM IP will be:				 DHCP"
@@ -3056,7 +3126,7 @@ $ADCONTROLLERHN = $ADCONTROLLER.HostName
 $ADCONTROLLERHN = $ADCONTROLLERHN.TRIMEND(" ")
 $ADDOMAIN = Get-ADDomain $STRINGDOMAIN -Credential $MYDOMAINCREDENTIAL
 $DNDOMAIN = $ADDOMAIN.DistinguishedName
-$TARGETPATH = 'ou=Build,ou=Server_OU,' + $DNDOMAIN
+$TARGETPATH = 'OU=Servers,OU=Standard Computers,OU=Standard,OU=SKY,' + $DNDOMAIN #Joe: maybe change this to a better variable
 Write-Host "Creating AD Computer Object for "$FQDN
 #Update PowerShell Window Title
 $pswindow.windowtitle = "vDeploy - " + $VMNAME + " - Creating AD Computer Object for " + $FQDN
@@ -3092,9 +3162,9 @@ ELSE{
 	##Create Temporary Customization Spec with Static IP Information
 	#Reference https://blogs.vmware.com/PowerCLI/2014/06/working-customization-specifications-powercli-part-2.html
 	$TEMPOSCUSTOMIZATIONSPEC = New-OSCustomizationSpec -Spec $OSCUSTOMIZATION -Type NonPersistent
-	$TEMPOSCUSTOMIZATIONSPEC | Set-OSCustomizationSpec -GUIRunOnce $GUIRUNONCE_SCRIPT1 -AutoLogonCount 2
+	#Joe: $TEMPOSCUSTOMIZATIONSPEC | Set-OSCustomizationSpec -AutoLogonCount 2 -GUIRunOnce $GUIRUNONCE_SCRIPT1
 	$nicMapping = Get-OSCustomizationNicMapping -OSCustomizationSpec $TEMPOSCUSTOMIZATIONSPEC
-	$nicMapping | Set-OSCustomizationNicMapping -IpMode UseStaticIP -IpAddress $IP -SubnetMask $SUBNET -DefaultGateway $DG -DNS $DNS1,$DNS2
+	$nicMapping | Set-OSCustomizationNicMapping -IpMode UseStaticIP -IpAddress $IP -SubnetMask $SUBNET -DefaultGateway $DG -DNS $DNS1,$DNS2,$DNS3
 	##Create VM using Static IP Settings
 	Write-Host "Creating Temporary VM Customization Spec with Static IP Information"
 	Write-Host "VM Name "$VMNAME
@@ -3104,7 +3174,7 @@ ELSE{
 	Write-Host "IP Address "$IP
 	Write-Host "Subnet Mask "$Subnet
 	Write-HOST "Default Gateway "$DG
-	Write-Host "DNS Server(s) "$DNS1,$DNS2
+	Write-Host "DNS Server(s) "$DNS1,$DNS2,$DNS3
 	New-VM -VMHost $VMHOST -Name $VMNAME -Datastore $DATASTORE -DiskStorageFormat $Drive0StorageFormat -Template $TEMPLATE -Location (Get-FolderByPath -Path $VMFOLDER) -OSCustomizationSpec $TEMPOSCUSTOMIZATIONSPEC
 }
 $STARTTIMECLONESW.STOP()
@@ -3264,18 +3334,40 @@ $VMCONTROLLERS = Get-VM -Name $VMNAME | Get-ScsiController
 $TESTCONTROLLERCOUNT = [int]$Drive1Controller + 1
 IF($VMCONTROLLERS.Count -eq $TESTCONTROLLERCOUNT)
 {
-	$NEWDISK1 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive1Size -Persistence $Drive1Persistence -StorageFormat $Drive1StorageFormat
+	try{
+	    $NEWDISK1 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive1Size -Persistence $Drive1Persistence -StorageFormat $Drive1StorageFormat
+        Start-Sleep -s 10
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values" #Joe: added a catch here to understand failures better
+	}
 }
 Else{
-	$NEWDISK1 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive1Size -Persistence $Drive1Persistence -StorageFormat $Drive1StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	try{
+	    $NEWDISK1 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive1Size -Persistence $Drive1Persistence -StorageFormat $Drive1StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+		Start-Sleep -s 10
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 ##Set SCSI Controller
 Write-Host "Setting SCSI Controller for Hard Disk 1"
 $DISK1CONTROLLER = "SCSI Controller " + $Drive1Controller
 $CONTROLLER = Get-ScsiController -Name $DISK1CONTROLLER -VM $VMNAME
+<#why is this here twice?
 $DISK1CONTROLLER = "SCSI Controller " + $Drive1Controller
 $CONTROLLER = Get-ScsiController -Name $DISK1CONTROLLER -VM $VMNAME
-Get-HardDisk -VM $VMNAME -Name "Hard disk 2" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+#>
+$CurController = Get-HardDisk -VM $VMNAME -Name "Hard disk 2" | Get-ScsiController
+$CurController.name
+try{
+	if(!($CurController.name -ieq $DISK1CONTROLLER)){
+		Get-HardDisk -VM $VMNAME -Name "Hard disk 2" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+	}
+}catch{
+	Stop-ScriptNow "vCenter Crashed!! 1"
+}
+Write-Host "SCSI Controller for Hard Disk 1 WORKED!"
+Start-Sleep -s 3 #Joe: had an issue with this crashing the web service and failing deployments. (usually on vSAN)
 ## Set SCSI Controller ID on New Hard Disk
 #Reference: https://communities.vmware.com/thread/421110
 $strVMToUpdate = $VMNAME
@@ -3287,6 +3379,7 @@ $spec.deviceChange[0].operation = "edit"
 $spec.deviceChange[0].device = $hdskToChange.ExtensionData
 $spec.deviceChange[0].device.unitNumber = $Drive1ControllerScsiID
 $vmToUpdate.ExtensionData.ReconfigVM_Task($spec)
+Write-Host "SCSI ID for Hard Disk 1 WORKED!"
 Start-Sleep -s 3
 }
 ##Create Hard Disk 2
@@ -3296,16 +3389,33 @@ $VMCONTROLLERS = Get-VM -Name $VMNAME | Get-ScsiController
 $TESTCONTROLLERCOUNT = [int]$Drive2Controller + 1
 IF($VMCONTROLLERS.Count -eq $TESTCONTROLLERCOUNT)
 {
-	$NEWDISK2 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive2Size -Persistence $Drive2Persistence -StorageFormat $Drive2StorageFormat
+	try{
+		$NEWDISK2 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive2Size -Persistence $Drive2Persistence -StorageFormat $Drive2StorageFormat
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 Else{
-	$NEWDISK2 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive2Size -Persistence $Drive2Persistence -StorageFormat $Drive2StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	try{
+		$NEWDISK2 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive2Size -Persistence $Drive2Persistence -StorageFormat $Drive2StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+    }catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 ##Set SCSI Controller
 Write-Host "Setting SCSI Controller for Hard Disk 2"
 $DISK2CONTROLLER = "SCSI Controller " + $Drive2Controller
 $CONTROLLER = Get-ScsiController -Name $DISK2CONTROLLER -VM $VMNAME
-Get-HardDisk -VM $VMNAME -Name "Hard disk 3" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+#Joe: Test
+$CurController = Get-HardDisk -VM $VMNAME -Name "Hard disk 3" | Get-ScsiController
+$CurController.name
+try{
+	if(!($CurController.name -ieq $DISK2CONTROLLER)){
+		Get-HardDisk -VM $VMNAME -Name "Hard disk 3" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+	}
+}catch{
+	Stop-ScriptNow "vCenter Crashed!! 2"
+}
 ## Set SCSI Controller ID on New Hard Disk
 #Reference: https://communities.vmware.com/thread/421110
 $strVMToUpdate = $VMNAME
@@ -3326,16 +3436,32 @@ $VMCONTROLLERS = Get-VM -Name $VMNAME | Get-ScsiController
 $TESTCONTROLLERCOUNT = [int]$Drive3Controller + 1
 IF($VMCONTROLLERS.Count -eq $TESTCONTROLLERCOUNT)
 {
-	$NEWDISK3 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive3Size -Persistence $Drive3Persistence -StorageFormat $Drive3StorageFormat
+	try{
+		$NEWDISK3 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive3Size -Persistence $Drive3Persistence -StorageFormat $Drive3StorageFormat
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 Else{
-	$NEWDISK3 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive3Size -Persistence $Drive3Persistence -StorageFormat $Drive3StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	try{
+		$NEWDISK3 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive3Size -Persistence $Drive3Persistence -StorageFormat $Drive3StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 ##Set SCSI Controller
 Write-Host "Setting SCSI Controller for Hard Disk 3"
 $DISK3CONTROLLER = "SCSI Controller " + $Drive3Controller
 $CONTROLLER = Get-ScsiController -Name $DISK3CONTROLLER -VM $VMNAME
-Get-HardDisk -VM $VMNAME -Name "Hard disk 4" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+$CurController = Get-HardDisk -VM $VMNAME -Name "Hard disk 4" | Get-ScsiController
+$CurController.name
+try{
+	if(!($CurController.name -ieq $DISK3CONTROLLER)){
+		Get-HardDisk -VM $VMNAME -Name "Hard disk 4" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+	}
+}catch{
+	Stop-ScriptNow "vCenter Crashed!! 3"
+}
 ## Set SCSI Controller ID on New Hard Disk
 #Reference: https://communities.vmware.com/thread/421110
 $strVMToUpdate = $VMNAME
@@ -3356,16 +3482,32 @@ $VMCONTROLLERS = Get-VM -Name $VMNAME | Get-ScsiController
 $TESTCONTROLLERCOUNT = [int]$Drive4Controller + 1
 IF($VMCONTROLLERS.Count -eq $TESTCONTROLLERCOUNT)
 {
-	$NEWDISK4 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive4Size -Persistence $Drive4Persistence -StorageFormat $Drive4StorageFormat
+	try{
+		$NEWDISK4 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive4Size -Persistence $Drive4Persistence -StorageFormat $Drive4StorageFormat
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 Else{
-	$NEWDISK4 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive4Size -Persistence $Drive4Persistence -StorageFormat $Drive4StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	try{
+		$NEWDISK4 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive4Size -Persistence $Drive4Persistence -StorageFormat $Drive4StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 ##Set SCSI Controller
 Write-Host "Setting SCSI Controller for Hard Disk 4"
 $DISK4CONTROLLER = "SCSI Controller " + $Drive4Controller
 $CONTROLLER = Get-ScsiController -Name $DISK4CONTROLLER -VM $VMNAME
-Get-HardDisk -VM $VMNAME -Name "Hard disk 5" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+$CurController = Get-HardDisk -VM $VMNAME -Name "Hard disk 5" | Get-ScsiController
+$CurController.name
+try{
+	if(!($CurController.name -ieq $DISK4CONTROLLER)){
+		Get-HardDisk -VM $VMNAME -Name "Hard disk 5" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+	}
+}catch{
+	Stop-ScriptNow "vCenter Crashed!! 4"
+}
 ## Set SCSI Controller ID on New Hard Disk
 #Reference: https://communities.vmware.com/thread/421110
 $strVMToUpdate = $VMNAME
@@ -3386,16 +3528,32 @@ $VMCONTROLLERS = Get-VM -Name $VMNAME | Get-ScsiController
 $TESTCONTROLLERCOUNT = [int]$Drive5Controller + 1
 IF($VMCONTROLLERS.Count -eq $TESTCONTROLLERCOUNT)
 {
-	$NEWDISK5 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive5Size -Persistence $Drive5Persistence -StorageFormat $Drive5StorageFormat
+	try{
+		$NEWDISK5 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive5Size -Persistence $Drive5Persistence -StorageFormat $Drive5StorageFormat
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 Else{
-	$NEWDISK5 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive5Size -Persistence $Drive5Persistence -StorageFormat $Drive5StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	try{
+		$NEWDISK5 = Get-VM -NAME $VMNAME | New-HardDisk -CapacityGB $Drive5Size -Persistence $Drive5Persistence -StorageFormat $Drive5StorageFormat | New-ScsiController -Type Paravirtual -BusSharingMode NoSharing
+	}catch{
+		Stop-ScriptNow "Check VMHDTypeList.csv for missing values"
+	}
 }
 ##Set SCSI Controller
 Write-Host "Setting SCSI Controller for Hard Disk 5"
 $DISK5CONTROLLER = "SCSI Controller " + $Drive5Controller
 $CONTROLLER = Get-ScsiController -Name $DISK5CONTROLLER -VM $VMNAME
-Get-HardDisk -VM $VMNAME -Name "Hard disk 6" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+$CurController = Get-HardDisk -VM $VMNAME -Name "Hard disk 5" | Get-ScsiController
+$CurController.name
+try{
+	if(!($CurController.name -ieq $DISK4CONTROLLER)){
+		Get-HardDisk -VM $VMNAME -Name "Hard disk 5" | Set-HardDisk -Controller $CONTROLLER -Confirm:$false
+	}
+}catch{
+	Stop-ScriptNow "vCenter Crashed!! 5"
+}
 ## Set SCSI Controller ID on New Hard Disk
 #Reference: https://communities.vmware.com/thread/421110
 $strVMToUpdate = $VMNAME
@@ -3727,7 +3885,7 @@ WHILE($VMIPADDRESS -ne $DNSIPADDRESS)
 		Write-Host "Canceling all tasks" -foregroundcolor red
 		Write-Host "VM Process Haulted" -foregroundcolor red
 		Write-Host "VM Build Process Failed" -foregroundcolor red -background yellow
-		Stop-Transcriptye
+		Stop-Transcript #Joe: typo here, was "Stop-Transcriptye"
 		Write-Host "Press any key to end session ..."
 		$x = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 		disconnect-viserver * -confirm:$false
