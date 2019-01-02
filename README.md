@@ -1,11 +1,11 @@
 # vDeploy 6.7
 
 This Project is a fork of Russell Hamker's vDeploy initially developed for:
-  *1) Powershell v5    
-  *2) PowerShell Module VMware.PowerCLI 6.5 
-  *3) PowerShell Module PowerNSX 3.0   
-  *4) Vsphere 6.5
-  *5) VMware NSX 6.3.3
+* 1) Powershell v5    
+* 2) PowerShell Module VMware.PowerCLI 6.5 
+* 3) PowerShell Module PowerNSX 3.0   
+* 4) Vsphere 6.5
+* 5) VMware NSX 6.3.3
   
 I am testing and updating the code to be a little more extensible, add features, bug fix, and make it compatible with vSphere 6.0, 6.5, and 6.7.
 
